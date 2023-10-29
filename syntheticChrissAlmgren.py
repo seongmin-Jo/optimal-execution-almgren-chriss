@@ -286,4 +286,94 @@ class MarketEnvironment():
         # Stop transacting
         self.transacting = False            
             
-           
+
+import numpy as np
+import random
+import collections
+
+# Constants from the provided code
+ANNUAL_VOLAT = 0.12                                
+BID_ASK_SP = 1 / 8                                 
+DAILY_TRADE_VOL = 5e6                              
+TRAD_DAYS = 250                                    
+DAILY_VOLAT = ANNUAL_VOLAT / np.sqrt(TRAD_DAYS)    
+
+TOTAL_SHARES = 1000000                                              
+STARTING_PRICE = 50                                                 
+LLAMBDA = 1e-6                                                       
+LIQUIDATION_TIME = 60                                                
+NUM_N = 60                                                           
+EPSILON = BID_ASK_SP / 2                                             
+SINGLE_STEP_VARIANCE = (DAILY_VOLAT  * STARTING_PRICE) ** 2          
+ETA = BID_ASK_SP / (0.01 * DAILY_TRADE_VOL)                          
+GAMMA = BID_ASK_SP / (0.1 * DAILY_TRADE_VOL)                         
+
+# Now, re-declare the GBM_MarketEnvironment class
+class GBM_MarketEnvironment():
+    
+    def __init__(self, randomSeed=0, lqd_time=LIQUIDATION_TIME, num_tr=NUM_N, lambd=LLAMBDA, mu=0):
+        # Set the random seed
+        random.seed(randomSeed)
+        
+        # Parameters
+        self.mu = mu  # drift for GBM
+        
+        # Initialize the financial parameters so we can access them later
+        self.anv = ANNUAL_VOLAT
+        self.basp = BID_ASK_SP
+        self.dtv = DAILY_TRADE_VOL
+        self.dpv = DAILY_VOLAT
+        
+        # Initialize the Almgren-Chriss parameters so we can access them later
+        self.total_shares = TOTAL_SHARES
+        self.startingPrice = STARTING_PRICE
+        self.llambda = lambd
+        self.liquidation_time = lqd_time
+        self.num_n = num_tr
+        self.epsilon = EPSILON
+        self.singleStepVariance = SINGLE_STEP_VARIANCE
+        self.eta = ETA
+        self.gamma = GAMMA
+        
+        # Calculate some Almgren-Chriss parameters
+        self.tau = self.liquidation_time / self.num_n 
+        self.eta_hat = self.eta - (0.5 * self.gamma * self.tau)
+        self.kappa_hat = np.sqrt((self.llambda * self.singleStepVariance) / self.eta_hat)
+        self.kappa = np.arccosh((((self.kappa_hat ** 2) * (self.tau ** 2)) / 2) + 1) / self.tau
+
+        # Set the variables for the initial state
+        self.shares_remaining = self.total_shares
+        self.timeHorizon = self.num_n
+        self.logReturns = collections.deque(np.zeros(6))
+        
+        # Set the initial impacted price to the starting price
+        self.prevImpactedPrice = self.startingPrice
+
+        # Set the initial transaction state to False
+        self.transacting = False
+        
+        # Set a variable to keep track of the trade number
+        self.k = 0
+        
+    # ... Rest of the methods would remain similar ...
+    
+    def step(self, action):
+        # Create a class that will be used to keep track of information about the transaction
+        class Info(object):
+            pass        
+        info = Info()
+        
+        # Set the done flag to False. This indicates that we haven't sold all the shares yet.
+        info.done = False
+                
+        # GBM update for stock price
+        info.price = self.prevImpactedPrice * np.exp((self.mu - 0.5 * self.dpv**2) * self.tau + self.dpv * np.sqrt(self.tau) * random.normalvariate(0, 1))
+        
+        # ... Rest of the method would remain similar ...
+        return (state, np.array([reward]), info.done, info)
+
+    # ... Rest of the methods would remain similar ...
+
+# Instantiating the environment to check
+gbm_env = GBM_MarketEnvironment()
+gbm_env

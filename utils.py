@@ -112,15 +112,13 @@ def plot_price_model(seed = 0, num_days = 1000):
     
     # Plot the price history for the given number of days
     price_df = pd.DataFrame(data = price_hist,  columns = ['Stock'], dtype = 'float64')
-    ax = price_df.plot(colormap = 'cool', grid = False)
-    ax.set_facecolor(color = 'k')
+    ax = price_df.plot(grid = False)
     ax = plt.gca()
     yNumFmt = mticker.StrMethodFormatter('${x:,.2f}')
     ax.yaxis.set_major_formatter(yNumFmt)
     plt.ylabel('Stock Price')
     plt.xlabel('days')
     plt.show()
-    
 
     
 def get_optimal_vals(lq_time = 60, nm_trades = 60, tr_risk = 1e-6, title = ''):
@@ -327,23 +325,26 @@ def plot_trade_list(lq_time = 60, nm_trades = 60, tr_risk = 1e-6, show_trl = Fal
     fig, axes = plt.subplots(nrows = 1, ncols = 2)
     
     # Make a scatter plot of the trade list
-    df.iloc[1:].plot.scatter(x = 'Trade Number', y = 'Stocks Sold', c = 'Stocks Sold', colormap = 'gist_rainbow',
+    # df.iloc[1:].plot.scatter(x = 'Trade Number', y = 'Stocks Sold', c = 'Stocks Sold', colormap = 'gist_rainbow',
+    #                                              alpha = 1, sharex = False, s = 50, colorbar = False, ax = axes[0])
+    df.iloc[1:].plot.scatter(x = 'Trade Number', y = 'Stocks Sold', c = 'Stocks Sold',
                                                  alpha = 1, sharex = False, s = 50, colorbar = False, ax = axes[0])
     
     # Plot a line through the points of the scatter plot of the trade list
     axes[0].plot(df['Trade Number'].iloc[1:], df['Stocks Sold'].iloc[1:], linewidth = 2.0, alpha = 0.5)
-    axes[0].set_facecolor(color = 'k')
+    # axes[0].set_facecolor(color = 'k')
     yNumFmt = mticker.StrMethodFormatter('{x:,.0f}')
     axes[0].yaxis.set_major_formatter(yNumFmt)
     axes[0].set_title('Trading List')
 
     # Make a scatter plot of the number of stocks remaining after each trade
-    df.plot.scatter(x = 'Trade Number', y = 'Stocks Remaining', c = 'Stocks Remaining', colormap = 'gist_rainbow',
-                                                 alpha = 1, sharex = False, s = 50, colorbar = False, ax = axes[1])
-    
+    # df.plot.scatter(x = 'Trade Number', y = 'Stocks Remaining', c = 'Stocks Remaining', colormap = 'gist_rainbow',
+    #                                              alpha = 1, sharex = False, s = 50, colorbar = False, ax = axes[1])
+    df.plot.scatter(x = 'Trade Number', y = 'Stocks Remaining', c = 'Stocks Remaining',
+                                                 alpha = 1, sharex = False, s = 50, colorbar = False, ax = axes[1])    
     # Plot a line through the points of the scatter plot of the number of stocks remaining after each trade
     axes[1].plot(df['Trade Number'], df['Stocks Remaining'], linewidth = 2.0, alpha = 0.5)
-    axes[1].set_facecolor(color = 'k')
+    # axes[1].set_facecolor(color = 'k')
     yNumFmt = mticker.StrMethodFormatter('{x:,.0f}')
     axes[1].yaxis.set_major_formatter(yNumFmt)
     axes[1].set_title('Trading Trajectory')
@@ -408,8 +409,8 @@ def implement_trade_list(seed = 0, lq_time = 60, nm_trades = 60, tr_risk = 1e-6)
 
     # Plot the impacted price
     price_df = pd.DataFrame(data = price_hist,  columns = ['Stock'], dtype = 'float64')
-    ax = price_df.plot(colormap = 'cool', grid = False)
-    ax.set_facecolor(color = 'k')
+    ax = price_df.plot(grid = False)
+    # ax.set_facecolor(color = 'k')
     ax.set_title('Impacted Stock Price')
     ax = plt.gca()
     yNumFmt = mticker.StrMethodFormatter('${x:,.2f}')
